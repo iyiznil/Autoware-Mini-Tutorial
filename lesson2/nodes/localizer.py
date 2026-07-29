@@ -69,7 +69,7 @@ class Localizer:
         t.child_frame_id = "base_link"
         t.transform.translation.x = x
         t.transform.translation.y = y
-        t.transform.translation.z = msg.height - self.undulation
+        t.transform.translation.z = current_pose_msg.pose.position.z
         t.transform.rotation = orientation
 
         # publish transform
