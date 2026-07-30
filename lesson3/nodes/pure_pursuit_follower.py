@@ -6,6 +6,7 @@ from threading import Lock
 
 from autoware_mini.msg import Path, VehicleCommand
 from geometry_msgs.msg import PoseStamped
+import shapely
 from tf.transformations import euler_from_quaternion
 
 from shapely.geometry import LineString, Point
@@ -62,23 +63,16 @@ class PurePursuitFollower:
         else:
             current_pose = Point([msg.pose.position.x, msg.pose.position.y])
             d_ego_from_path_start = self.path_linestring.project(current_pose)
-            print(d_ego_from_path_start)
 
             _, _, heading = euler_from_quaternion([msg.pose.orientation.x, msg.pose.orientation.y, msg.pose.orientation.z, msg.pose.orientation.w])
             lookahead_point = self.path_linestring.interpolate(d_ego_from_path_start + self.lookahead_distance)
             lookahead_heading = np.arctan2(lookahead_point.y - msg.pose.position.y, lookahead_point.x - msg.pose.position.x)
-            ld = np.sqrt((lookahead_point.x - msg.pose.position.x) ** 2 + (lookahead_point.y - msg.pose.position.y) ** 2)
-            steering_angle = np.arctan2(2 * self.wheel_base * np.sin(lookahead_heading - heading) / ld, 1.0)
+            ld = shapely.distance(lookahead_point, current_pose)
+            steering_angle = np.arctan2(2 * self.wheel_base * np.sin(lookahead_heading - heading), ld)
 
 
             linear_velocity = float(self.distance_to_velocity_interpolator(d_ego_from_path_start))
             linear_acceleration = 0.0
-
-            # TODO 5: Use the distance-to-velocity interpolator to get the velocity
-            #         at the ego vehicle's position on the path. Replace the constant
-            #         linear_velocity with the interpolated value.
-            #         Since the interpolator is now used here, add a check for
-            #         self.distance_to_velocity_interpolator is None to the if statement above.
 
         vehicle_cmd = VehicleCommand()
 
@@ -87,7 +81,6 @@ class PurePursuitFollower:
         vehicle_cmd.steering_angle = steering_angle
         vehicle_cmd.speed = linear_velocity
         vehicle_cmd.acceleration = linear_acceleration
-        print(vehicle_cmd.steering_angle, msg.pose.position.x, msg.pose.position.y)
         self.vehicle_cmd_pub.publish(vehicle_cmd)
 
     def run(self):
