@@ -40,7 +40,7 @@ class Localizer:
         x, y = self.transformer.transform(msg.latitude, msg.longitude)
         x = x - self.origin_x
         y = y - self.origin_y
-        print(x,y)
+ 
        
         azimuth_correction = self.utm_projection.get_factors(msg.longitude, msg.latitude).meridian_convergence
         yaw = self.convert_azimuth_to_yaw(math.radians(msg.azimuth - azimuth_correction))
