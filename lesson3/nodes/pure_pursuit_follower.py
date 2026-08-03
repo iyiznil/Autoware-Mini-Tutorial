@@ -66,7 +66,7 @@ class PurePursuitFollower:
             _, _, heading = euler_from_quaternion([msg.pose.orientation.x, msg.pose.orientation.y, msg.pose.orientation.z, msg.pose.orientation.w])
             lookahead_point = self.path_linestring.interpolate(d_ego_from_path_start + self.lookahead_distance)
             lookahead_heading = np.arctan2(lookahead_point.y - msg.pose.position.y, lookahead_point.x - msg.pose.position.x)
-            ld = shapely.distance(lookahead_point, current_pose)
+            ld = distance(lookahead_point, current_pose)
             steering_angle = np.arctan2(2 * self.wheel_base * np.sin(lookahead_heading - heading), ld)
 
 
