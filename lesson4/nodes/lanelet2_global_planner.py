@@ -6,6 +6,7 @@ from threading import Lock
 
 from geometry_msgs.msg import PoseStamped
 from autoware_mini.msg import Path, Waypoint
+from shapely.geometry import LineString, Point
 
 import lanelet2
 from lanelet2.io import Origin, load
@@ -114,19 +115,23 @@ class GlobalPlanner:
 
         if not waypoints:
             return waypoints
-        
+
+        line = LineString([(wp.position.x, wp.position.y) for wp in waypoints])
+        goal = Point(self.goal_point.x, self.goal_point.y)
+        snapped = line.interpolate(line.project(goal))
+
         closest_index = min(
-                range(len(waypoints)),
-                key=lambda index: np.sqrt(
-                    (waypoints[index].position.x - self.goal_point.x) ** 2 +
-                    (waypoints[index].position.y - self.goal_point.y) ** 2
-                ),
-            )
+            range(len(waypoints)),
+            key=lambda index: np.sqrt(
+                (waypoints[index].position.x - snapped.x) ** 2 +
+                (waypoints[index].position.y - snapped.y) ** 2
+            ),
+        )
 
-        waypoints = waypoints[:closest_index+1]
-        waypoints[-1].position.x = self.goal_point.x
-        waypoints[-1].position.y = self.goal_point.y
-
+        waypoints = waypoints[:closest_index + 1]
+        waypoints[-1].position.x = snapped.x
+        waypoints[-1].position.y = snapped.y
+        self.goal_point = BasicPoint2d(snapped.x, snapped.y)    
 
         return waypoints
 
