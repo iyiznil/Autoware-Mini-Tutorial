@@ -6,7 +6,6 @@ from threading import Lock
 
 from autoware_mini.msg import Path, VehicleCommand
 from geometry_msgs.msg import PoseStamped
-import shapely
 from tf.transformations import euler_from_quaternion
 
 from shapely.geometry import LineString, Point
