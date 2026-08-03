@@ -88,13 +88,12 @@ class GlobalPlanner:
         if self.goal_point is None:
             return
 
-        if self.goal_point is not None:
-            distance_to_goal = np.sqrt((self.current_location.x - self.goal_point.x) ** 2 +
-                                        (self.current_location.y - self.goal_point.y) ** 2)
-            if distance_to_goal <= self.distance_to_goal_limit:
-                rospy.loginfo("%s - Goal reached. Distance to goal: %.2f m", rospy.get_name(), distance_to_goal)
-                self.publish_lane_from_waypoints_list([])  # Publish an empty path
-                self.goal_point = None  # Reset the goal point
+        distance_to_goal = np.sqrt((self.current_location.x - self.goal_point.x) ** 2 +
+                                    (self.current_location.y - self.goal_point.y) ** 2)
+        if distance_to_goal <= self.distance_to_goal_limit:
+            self.publish_lane_from_waypoints_list([])  # Publish an empty path
+            self.goal_point = None  # Reset the goal point
+            rospy.loginfo("%s - Goal reached. Distance to goal: %.2f m", rospy.get_name(), distance_to_goal)
 
     def convert_laneletseq_to_waypoints_list(self, laneletseq):
         waypoints = []
