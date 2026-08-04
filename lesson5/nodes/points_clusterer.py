@@ -44,7 +44,7 @@ class PointsClusterer:
             ('y', np.float32),
             ('z', np.float32),
             ('label', np.int32)
-]))
+        ]))
 
         # Create the message using msgify, set the correct header and publish
         clustered_msg = msgify(PointCloud2, data)
