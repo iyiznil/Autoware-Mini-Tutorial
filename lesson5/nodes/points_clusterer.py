@@ -29,6 +29,8 @@ class PointsClusterer:
 
         data = numpify(msg)
         points = structured_to_unstructured(data[['x', 'y', 'z']], dtype=np.float32)
+        if len(points) == 0:
+            return
         labels = self.clusterer.fit_predict(points)
 
         # Concatenate points with labels
@@ -45,7 +47,6 @@ class PointsClusterer:
 ]))
 
         # Create the message using msgify, set the correct header and publish
-        # TODO
         clustered_msg = msgify(PointCloud2, data)
         clustered_msg.header.stamp = msg.header.stamp
         clustered_msg.header.frame_id = msg.header.frame_id
