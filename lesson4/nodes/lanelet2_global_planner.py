@@ -98,8 +98,12 @@ class GlobalPlanner:
 
     def convert_laneletseq_to_waypoints_list(self, laneletseq):
         waypoints = []
+        last_lanelet_start_index = 0
 
         for j, lanelet in enumerate(laneletseq):
+            if j == len(laneletseq) - 1:
+                last_lanelet_start_index = len(waypoints)
+
             speed = lanelet.attributes['speed_ref'] if 'speed_ref' in lanelet.attributes else self.speed_limit
             speed = min(float(speed), self.speed_limit) / 3.6
 
@@ -116,19 +120,20 @@ class GlobalPlanner:
         if not waypoints:
             return waypoints
 
-        line = LineString([(wp.position.x, wp.position.y) for wp in waypoints])
+        last_lanelet_waypoints = waypoints[last_lanelet_start_index:]
+        line = LineString([(wp.position.x, wp.position.y) for wp in last_lanelet_waypoints])
         goal = Point(self.goal_point.x, self.goal_point.y)
         snapped = line.interpolate(line.project(goal))
 
         closest_index = min(
-            range(len(waypoints)),
+            range(len(last_lanelet_waypoints)),
             key=lambda index: np.sqrt(
-                (waypoints[index].position.x - snapped.x) ** 2 +
-                (waypoints[index].position.y - snapped.y) ** 2
+                (last_lanelet_waypoints[index].position.x - snapped.x) ** 2 +
+                (last_lanelet_waypoints[index].position.y - snapped.y) ** 2
             ),
         )
 
-        waypoints = waypoints[:closest_index + 1]
+        waypoints = waypoints[:last_lanelet_start_index + closest_index + 1]
         waypoints[-1].position.x = snapped.x
         waypoints[-1].position.y = snapped.y
         self.goal_point = BasicPoint2d(snapped.x, snapped.y)    
