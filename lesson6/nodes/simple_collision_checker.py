@@ -76,17 +76,63 @@ class SimpleCollisionChecker:
             self.collision_points_pub.publish(collision_points_msg)
             return
 
-        # TODO 1: Create obstacle collision points.
-        #         - Create a Shapely LineString from the local path waypoints
-        #         - Buffer it with safety_box_width / 2 (cap_style="flat")
-        #         - If detected_objects is not None and not empty, iterate over them
-        #           and add collision points from their intersections with the buffered path
-        #           to the collision_points array
+        local_path_linestring = shapely.LineString([(wp.position.x, wp.position.y) for wp in msg.waypoints])
+        local_path_buffer = local_path_linestring.buffer(self.safety_box_width / 2, cap_style="flat")
+        shapely.prepare(local_path_buffer)
 
-        # TODO 7: Add goal point as collision point.
-        #         - Check if goal_point is within the buffered local path
-        #         - If so, append it as a collision point with category=1, zero velocity,
-        #           distance_to_stop=braking_safety_distance_goal
+        if detected_objects is not None and len(detected_objects) > 0:
+            for obj in detected_objects:
+                convex_hull_2d = np.array(obj.convex_hull, dtype=np.float32).reshape(-1, 3)[:, :2]
+                obj_polygon = shapely.Polygon(convex_hull_2d)
+
+                intersection = local_path_buffer.intersection(obj_polygon)
+
+                if intersection.geom_type == "Point":
+                    intersection_points = [intersection.coords[0]]
+                elif intersection.geom_type in ("LineString", "LinearRing"):
+                    intersection_points = list(intersection.coords)
+                elif intersection.geom_type == "Polygon":
+                    intersection_points = list(intersection.exterior.coords)
+                else:
+                    intersection_points = []
+                    for geom in getattr(intersection, "geoms", []):
+                        if geom.geom_type == "Point":
+                            intersection_points.append(geom.coords[0])
+                        elif geom.geom_type in ("LineString", "LinearRing"):
+                            intersection_points.extend(list(geom.coords))
+                        elif geom.geom_type == "Polygon":
+                            intersection_points.extend(list(geom.exterior.coords))
+
+                min_z = float(np.min(np.array(obj.convex_hull, dtype=np.float32).reshape(-1, 3)[:, 2]))
+
+                                
+                for x, y in intersection_points:
+                    collision_points = np.append(collision_points, np.array([(
+                        x,
+                        y,
+                        min_z,
+                        0.0,  # vx
+                        0.0,  # vy
+                        0.0,  # vz
+                        self.braking_safety_distance_obstacle,
+                        np.inf,  # deceleration_limit
+                        3,  # category = static obstacle
+                        )], dtype=DTYPE))
+
+        if goal_point is not None:
+            goal_point_shapely = shapely.Point(goal_point.x, goal_point.y)
+            if local_path_buffer.intersects(goal_point_shapely.buffer(0.1)):
+                collision_points = np.append(collision_points, np.array(
+                    [(
+                        goal_point.x, 
+                        goal_point.y, 
+                        0.0, 
+                        0.0, 
+                        0.0, 
+                        0.0, 
+                        self.braking_safety_distance_goal, 
+                        np.inf, 1
+              )], dtype=DTYPE))
 
         # TODO 9 (lesson 7): add stop line collision points for red traffic lights
 
