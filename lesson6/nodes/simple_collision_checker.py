@@ -85,39 +85,26 @@ class SimpleCollisionChecker:
                 convex_hull_2d = np.array(obj.convex_hull, dtype=np.float32).reshape(-1, 3)[:, :2]
                 obj_polygon = shapely.Polygon(convex_hull_2d)
 
-                intersection = local_path_buffer.intersection(obj_polygon)
+                if local_path_buffer.intersects(obj_polygon):
+                    intersection = local_path_buffer.intersection(obj_polygon)
+                    intersection_points = shapely.get_coordinates(intersection)[:, :2]
 
-                if intersection.geom_type == "Point":
-                    intersection_points = [intersection.coords[0]]
-                elif intersection.geom_type in ("LineString", "LinearRing"):
-                    intersection_points = list(intersection.coords)
-                elif intersection.geom_type == "Polygon":
-                    intersection_points = list(intersection.exterior.coords)
-                else:
-                    intersection_points = []
-                    for geom in getattr(intersection, "geoms", []):
-                        if geom.geom_type == "Point":
-                            intersection_points.append(geom.coords[0])
-                        elif geom.geom_type in ("LineString", "LinearRing"):
-                            intersection_points.extend(list(geom.coords))
-                        elif geom.geom_type == "Polygon":
-                            intersection_points.extend(list(geom.exterior.coords))
+                    min_z = float(np.min(np.array(obj.convex_hull, dtype=np.float32).reshape(-1, 3)[:, 2]))
+                    object_speed = float(np.linalg.norm([obj.velocity.x, obj.velocity.y, obj.velocity.z]))
+                    collision_category = 4 if object_speed > self.stopped_speed_limit else 3
 
-                min_z = float(np.min(np.array(obj.convex_hull, dtype=np.float32).reshape(-1, 3)[:, 2]))
-
-                                
-                for x, y in intersection_points:
-                    collision_points = np.append(collision_points, np.array([(
-                        x,
-                        y,
-                        min_z,
-                        0.0,  # vx
-                        0.0,  # vy
-                        0.0,  # vz
-                        self.braking_safety_distance_obstacle,
-                        np.inf,  # deceleration_limit
-                        3,  # category = static obstacle
-                        )], dtype=DTYPE))
+                    for x, y in intersection_points:
+                        collision_points = np.append(collision_points, np.array([(
+                            x,
+                            y,
+                            min_z,
+                            obj.velocity.x,  # vx
+                            obj.velocity.y,  # vy
+                            obj.velocity.z,  # vz
+                            self.braking_safety_distance_obstacle,
+                            np.inf,  # deceleration_limit
+                            collision_category,
+                            )], dtype=DTYPE))
 
         if goal_point is not None:
             goal_point_shapely = shapely.Point(goal_point.x, goal_point.y)
@@ -126,7 +113,7 @@ class SimpleCollisionChecker:
                     [(
                         goal_point.x, 
                         goal_point.y, 
-                        0.0, 
+                        goal_point.z, 
                         0.0, 
                         0.0, 
                         0.0, 

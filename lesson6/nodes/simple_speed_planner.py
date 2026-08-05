@@ -81,10 +81,6 @@ class SimpleSpeedPlanner:
             collision_point_braking_distances = collision_point_distances - self.distance_to_car_front
             stopping_point_distances = collision_point_distances - collision_points['distance_to_stop']
             target_distances = collision_point_braking_distances - collision_points['distance_to_stop']
-
-            calculated_target_velocities = np.sqrt(
-                2 * self.default_deceleration * np.maximum(0.0, target_distances)
-            )
             
             collision_point_path_headings = [self.get_heading_at_distance(local_path_linestring, d) for d in collision_point_distances]
             collision_point_speeds = np.array([self.project_vector_to_heading(heading, Vector3(vx, vy, vz))
@@ -107,7 +103,6 @@ class SimpleSpeedPlanner:
             target_object_speed = float(collision_point_speeds[target_index])
             collision_point_category = int(collision_points[target_index]["category"])
             stopping_point_distance = float(stopping_point_distances[target_index])
-            target_velocity = float(calculated_target_velocities[target_index])
             
             path = Path()
             path.header = local_path_msg.header
