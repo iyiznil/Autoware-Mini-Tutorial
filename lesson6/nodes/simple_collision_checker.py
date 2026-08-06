@@ -83,6 +83,7 @@ class SimpleCollisionChecker:
         with self.lock:
             detected_objects = self.detected_objects
             goal_point = self.goal_point
+            stopline_statuses = self.stopline_statuses.copy()
 
         collision_points = np.array([], dtype=DTYPE)
 
@@ -137,7 +138,7 @@ class SimpleCollisionChecker:
                         np.inf, 1
               )], dtype=DTYPE))
 
-        for stop_line_id, status in self.stopline_statuses.items():
+        for stop_line_id, status in stopline_statuses.items():
             if status != StopLineStatus.STATUS_STOP:
                 continue
             stop_line = self.stop_lines.get(stop_line_id)

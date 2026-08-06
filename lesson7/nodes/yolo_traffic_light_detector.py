@@ -170,7 +170,11 @@ class YoloTrafficLightDetector:
         if stop_line_ids_on_path:
 
             try:
-                transform = self.tf_buffer.lookup_transform(transform_to_frame, transform_from_frame, image_time_stamp)
+                transform = self.tf_buffer.lookup_transform(
+                    transform_to_frame,
+                    transform_from_frame,
+                    image_time_stamp,
+                    rospy.Duration.from_sec(self.transform_timeout))
             except (tf2_ros.TransformException, rospy.ROSTimeMovedBackwardsException) as e:
                 rospy.logwarn("%s - %s", rospy.get_name(), e)
                 return
@@ -245,7 +249,7 @@ class YoloTrafficLightDetector:
                 iou_score = self.calculate_iou(np.array([[x1_map, y1_map, x2_map, y2_map]]), yolo_roi[np.newaxis, :])[0][0]
                 if iou_score >= self.iou_threshold:
                     if matched_roi is None or iou_score > matched_roi[0]:
-                        matched_roi = [cls, score, yolo_roi, idx]
+                        matched_roi = [iou_score, cls, score, yolo_roi, idx]
 
             tfl_result = StopLineStatus()
             tfl_result.traffic_light_id = traffic_light_id
@@ -257,8 +261,8 @@ class YoloTrafficLightDetector:
                 tfl_result.status_text = "missing"
                 match_dict[traffic_light_id] = None
             else:
-                tfl_result.status = CLASS_TO_TLRESULT[matched_roi[0]]
-                tfl_result.status_text = CLASS_TO_STRING[matched_roi[0]]
+                tfl_result.status = CLASS_TO_TLRESULT[matched_roi[1]]
+                tfl_result.status_text = CLASS_TO_STRING[matched_roi[1]]
                 match_dict[traffic_light_id] = matched_roi
 
             tfl_results.append(tfl_result)
@@ -344,7 +348,7 @@ class YoloTrafficLightDetector:
 
                 else:
                     # map roi was matched with a yolo roi
-                    cl, score, yolo_roi, yolo_idx = match_dict[traffic_light_id]
+                    _, cl, score, yolo_roi, yolo_idx = match_dict[traffic_light_id]
 
                     yolo_min_u, yolo_min_v, yolo_max_u, yolo_max_v = yolo_roi
                     matched_yolo_roi_idxs.append(yolo_idx)
