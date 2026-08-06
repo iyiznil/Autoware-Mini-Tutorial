@@ -65,11 +65,33 @@ Your framework from the previous lessons is a simplified one. Remember all limit
 4. Fill in the three descriptions below: what happens in the scenario, how your framework fails, and what change to the framework would fix it. Add screenshots if needed.
 5. Commit and push everything, and be ready to demonstrate your failure cases at the practice session
 
-##### Failure case 1
-...
 
-##### Failure case 2
-...
+##### Failure Case 1: Unecessary Braking
 
-##### Failure case 3
-...
+    Target Criterion: CollisionTest
+
+    Scenario Context: In lesson8/scenarios/failure_case_1.json, an actor vehicle is traveling straight along its path behind the ego vehicle. Without any lane cutting or obstacles ahead, the ego vehicle suddenly executes unnecessary, aggressive hard braking.
+
+    Failure Analysis: The ego vehicle's framework generates a false-positive collision constraint or miscalculates path clearance, triggering an emergency stop when no threat exists. Because the ego vehicle stops abruptly, the trailing actor vehicle moving straight behind cannot react in time and rear-ends the ego vehicle. The impact causes the actor vehicle to lose control and swerve wildly across the road.
+
+    Proposed Fix: Improve perception filtering and longitudinal planning validation to eliminate false-positive emergency braking. The planner should require multi-frame verification of obstacle constraints before issuing harsh deceleration commands, while incorporating rear-traffic awareness to avoid inducing rear-end collisions.
+
+##### Failure Case 2: Illegal U-Turn at Merging Lane
+
+    Target Criterion: CollisionTest
+
+    Scenario Context: In lesson8/scenarios/failure_case_2.json, an actor vehicle executes an illegal U-turn across a merging lane directly into the ego vehicle's path, resulting in a crash. A defensive human driver recognizes high-risk, multi-lane merge zones and anticipates potential traffic anomalies—such as lost drivers or illegal turn attempts—by covering the brake and maintaining extra spacing.
+
+    Failure Analysis: The framework operates under a strict ideal-world assumption that all actors follow traffic rules and lane designations. Because it fails to account for non-compliant or out-of-distribution traffic behavior until the offending vehicle is already perpendicular across the lane, the ego vehicle lacks the stopping distance required to prevent a high-speed impact.
+
+    Proposed Fix: Integrate anomaly-aware behavior prediction and risk assessment for complex road geometries like merge lanes. The motion predictor should monitor non-standard vehicle states (e.g., high yaw rates or low speeds in merge zones) and prompt the planner to defensively reduce speed and increase follow distance when anomaly indicators are detected.
+
+##### Failure Case 3: Blind Spot Jaywalking
+
+    Target Criterion: CollisionTest.
+
+    Scenario Context: In lesson8/scenarios/failure_case_3.json, a pedestrian emerges suddenly from behind an occlusion or blind spot and steps into the ego lane at close range. A careful human driver slows down when approaching occluded areas, covers the brake, and leaves additional lateral clearance near potential pedestrian hotspots.
+
+    Failure Analysis: The system evaluates collision risk purely against visible, currently detected objects and lacks spatial reasoning for unobserved or occluded regions. When a pedestrian abruptly emerges from a blind spot, the ego vehicle lacks sufficient headway to execute a smooth emergency stop.
+
+    Proposed Fix: Implement occlusion-aware velocity profiling and pedestrian risk mapping. The motion planner should evaluate visibility fields, lowering the ego speed when passing near large occlusions, parked vehicles, or blind crosswalks to maintain a safe stopping distance for potential hidden hazards.

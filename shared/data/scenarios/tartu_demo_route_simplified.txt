@@ -1,0 +1,54 @@
+
+ ======= Results of Scenario: vse_play ---- FAILURE =======
+
+ > Ego vehicles:
+Actor(id=315, type=vehicle.lexus.utlexus); 
+
+ > NPC vehicles:
+Actor(id=551, type=vehicle.ford.mustang); Actor(id=552, type=vehicle.audi.tt); Actor(id=553, type=vehicle.vespa.zx125); Actor(id=554, type=vehicle.mitsubishi.fusorosa); Actor(id=555, type=vehicle.yamaha.yzf); Actor(id=556, type=vehicle.kawasaki.ninja); Actor(id=557, type=vehicle.mercedes.coupe); Actor(id=558, type=vehicle.volkswagen.t2_2021); Actor(id=559, type=vehicle.harley-davidson.low_rider); Actor(id=560, type=vehicle.mitsubishi.fusorosa); Actor(id=561, type=vehicle.tesla.cybertruck); 
+
+ > Pedestrians:
+Actor(id=563, type=walker.pedestrian.0002); Actor(id=564, type=walker.pedestrian.0003); Actor(id=565, type=walker.pedestrian.0004); Actor(id=566, type=walker.pedestrian.0005); Actor(id=567, type=walker.pedestrian.0006); Actor(id=568, type=walker.pedestrian.0007); Actor(id=569, type=walker.pedestrian.0008); Actor(id=570, type=walker.pedestrian.0009); Actor(id=571, type=walker.pedestrian.0010); Actor(id=572, type=walker.pedestrian.0011); Actor(id=573, type=walker.pedestrian.0012); Actor(id=574, type=walker.pedestrian.0013); Actor(id=575, type=walker.pedestrian.0014); Actor(id=576, type=walker.pedestrian.0015); Actor(id=577, type=walker.pedestrian.0041); 
+
+ > Simulation Information
+╒═══════════════════════╤═════════════════════╕
+│ Start Time            │ 2026-08-06 14:39:46 │
+├───────────────────────┼─────────────────────┤
+│ End Time              │ 2026-08-06 14:40:11 │
+├───────────────────────┼─────────────────────┤
+│ System Time           │ 24.12s              │
+├───────────────────────┼─────────────────────┤
+│ Game Time             │ 24.95s              │
+├───────────────────────┼─────────────────────┤
+│ Ratio (Game / System) │ 1.034               │
+╘═══════════════════════╧═════════════════════╛
+
+ > Criteria Information
+╒════════════════════════╤══════════════════════════════╤═════════╤══════════════╤═══════════════╕
+│ Actor                  │ Criterion                    │ Result  │ Actual Value │ Success Value │
+├────────────────────────┼──────────────────────────────┼─────────┼──────────────┼───────────────┤
+│ lexus.utlexus (id=315) │ CollisionTest (Req.)         │ SUCCESS │ 0            │ 0             │
+├────────────────────────┼──────────────────────────────┼─────────┼──────────────┼───────────────┤
+│ lexus.utlexus (id=315) │ CheckKeepLane (Req.)         │ SUCCESS │ 0            │ 0             │
+├────────────────────────┼──────────────────────────────┼─────────┼──────────────┼───────────────┤
+│ lexus.utlexus (id=315) │ OffRoadTest (Req.)           │ SUCCESS │ 0            │ 0             │
+├────────────────────────┼──────────────────────────────┼─────────┼──────────────┼───────────────┤
+│ lexus.utlexus (id=315) │ OnSidewalkTest (Req.)        │ SUCCESS │ 0            │ 0             │
+├────────────────────────┼──────────────────────────────┼─────────┼──────────────┼───────────────┤
+│ lexus.utlexus (id=315) │ RunningRedLightTest (Req.)   │ SUCCESS │ 0            │ 0             │
+├────────────────────────┼──────────────────────────────┼─────────┼──────────────┼───────────────┤
+│ lexus.utlexus (id=315) │ RunningStopTest (Req.)       │ SUCCESS │ 0            │ 0             │
+├────────────────────────┼──────────────────────────────┼─────────┼──────────────┼───────────────┤
+│ lexus.utlexus (id=315) │ OutsideRouteLanesTest (Req.) │ SUCCESS │ 0            │ 0             │
+├────────────────────────┼──────────────────────────────┼─────────┼──────────────┼───────────────┤
+│ lexus.utlexus (id=315) │ WrongLaneTest (Req.)         │ SUCCESS │ 0            │ 0             │
+├────────────────────────┼──────────────────────────────┼─────────┼──────────────┼───────────────┤
+│ lexus.utlexus (id=315) │ InRouteTest (Req.)           │ SUCCESS │ 0            │ 0             │
+├────────────────────────┼──────────────────────────────┼─────────┼──────────────┼───────────────┤
+│ lexus.utlexus (id=315) │ RouteCompletionTest (Req.)   │ FAILURE │ 100.0        │ 100           │
+├────────────────────────┼──────────────────────────────┼─────────┼──────────────┼───────────────┤
+│                        │ Timeout (Req.)               │ SUCCESS │ 24.95        │ 18000.0       │
+├────────────────────────┼──────────────────────────────┼─────────┼──────────────┼───────────────┤
+│                        │ GLOBAL RESULT                │ FAILURE │              │               │
+╘════════════════════════╧══════════════════════════════╧═════════╧══════════════╧═══════════════╛
+ ==========================================================
